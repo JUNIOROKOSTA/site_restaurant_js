@@ -1,0 +1,1 @@
+NPM para iniciar e debugar a inicialização> set DEBUG=saboroso:* & npm start
