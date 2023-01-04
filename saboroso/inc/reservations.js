@@ -1,6 +1,23 @@
 var conn = require('./db')
 
 module.exports = {
+
+     getReservations(){
+        return new Promise((resolve, reject)=>{
+
+            conn.query(
+                        `
+                SELECT * FROM tb_reservations ORDER BY date DESC
+                `, (err,results)=>{
+                if(err){
+                    reject(err);
+                };
+                resolve(results);
+    
+        })});
+        
+    },
+
     render(req, res, alertError, alertSuccess){
         res.render('reservation', {
             title: 'Restaurant Saboroso!',
@@ -15,16 +32,41 @@ module.exports = {
     },
     save(fields){
         return new Promise((resolve, reject)=>{
-            let date = fields.date.split('/');
-            fields.date = `${date[2]}-${date[1]}-${date[0]}`
+            if(fields.date.indexOf('/') > -1){
+                let date = fields.date.split('/');
+                fields.date = `${date[2]}-${date[1]}-${date[0]}`;
+            }
+            
 
-            conn.query(`
-            INSERT INTO tb_reservations (name, email, people, date, time)
-            VALUES(?, ?, ?, ?, ?)
-        `, [
-            fields.name, fields.email, 
-            fields.people, fields.date, fields.time
-        ], (err, result)=>{
+            let query, params;
+
+            if(parseInt(fields.id)> 0){
+                // if id > 0 ==> Update
+                query = `UPDATE INTO tb_reservations 
+                SET
+                    name = ?
+                    email = ?
+                    people = ?
+                    date = ?
+                    time = ? 
+                WHERE id = ? `;
+
+                 params =  [fields.name, fields.email, 
+                            fields.people, fields.date, 
+                            fields.time, fields.id]
+            } else {
+                // if id < 0 ==> Insert
+
+                query = `INSERT INTO tb_reservations 
+                (name, email, people, date, time)
+                VALUES(?, ?, ?, ?, ?)`;
+                
+                params =  [fields.name, fields.email, 
+                            fields.people, fields.date, 
+                            fields.time ]
+            }
+
+            conn.query(query, params, (err, result)=>{
             if(err){
                 reject(err);
             } else {

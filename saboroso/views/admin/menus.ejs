@@ -163,7 +163,23 @@
 
     formUpdate.save().then(json => {
         window.location.reload();
-      }).catch(err => { console.error(err) });
+      }).catch(err => { console.log(err) });
+
+    [...document.querySelectorAll('.btn-delete')].forEach(btnD =>{
+
+      btnD.addEventListener('click', e=>{
+        let tr = btnD.closest('tr')
+
+        let data = JSON.parse(tr.dataset.row);
+
+        if (`Confirma a exclusão do Menu "${data.title}" ?`) {
+          fetch(`/admin/menus/${data.id}`, {
+            method: 'DELETE'
+          }).then(response => response.json())
+            .then(json => { window.location.reload() })
+        }
+        });
+      });
 
     [...document.querySelectorAll('.btn-update')].forEach(btn=>{
       btn.addEventListener('click', e=>{

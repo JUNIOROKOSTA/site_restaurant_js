@@ -17,6 +17,20 @@ module.exports = ({
         
     },
 
+    delete(id){
+        return new Promise((resolve, reject)=>{
+            conn.query(`
+                DELETE FROM tb_menus WHERE id = ?
+            `,[id],(err, results)=>{
+                if(err){
+                    reject(err)
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    },
+
     save(fields, files){
         return new Promise((resolve, reject)=>{
 
@@ -28,7 +42,7 @@ module.exports = ({
                 fields.price, 
                 ];
 
-            if(files.photo.name){
+            if(files.photo){
                 queryPhoto = ',photo = ?';
                 params.push(fields.photo)
             }
@@ -45,7 +59,7 @@ module.exports = ({
                     WHERE id = ?
                 `;
             }else{
-                if(!files.photo.name){
+                if(!files.photo){
                     reject("Foto do prato é Obrigatório")
                 }
                 query = `
