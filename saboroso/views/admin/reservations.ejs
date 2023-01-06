@@ -74,7 +74,7 @@
                   <td><%= row.people %></td>
                   <td><%= moment(row.date).format("DD [de] MMMM [de] YYYY") %></td>
                   <td><%= row.time %></td>
-                  <td><button type="button" class="btn btn-xs btn-info btn-update" data-toggle="modal" data-target="#modal-update"><i
+                  <td><button type="button" class="btn btn-xs btn-info btn-update"><i
                         class="fa fa-pencil"></i> Editar</button>&nbsp;<button type="button" class="btn btn-xs btn-danger btn-delete"><i
                         class="fa fa-trash"></i> Excluir</button></td>
                 </tr>
@@ -206,59 +206,33 @@
     <!-- Main Footer -->
     <%- include("./inc_admin/footer.ejs") -%>
 
+    <script src="/js/moment.min.js"></script>
+
     <script src="/js/crud_data.js"></script>
+
+    <script src="/js/okosta_crud.js"></script>
 <script>
 
-  let formCreate = document.querySelector('#modal-create form');
+  new OkostaCrud({
+    deleteMsg: 'Confirma a exclusão da Reserva?"${data.name}" ?',
+    routerDelete: '/admin/reservations/${data.id}',
+     onUpdateLoad: (form, name, data) => {
 
-    formCreate.save().then(json => {
-      window.location.reload();
-    }).catch(err => { console.error(err) });
+      let input = form.querySelector(`[name=${name}]`);
 
-    let formUpdate = document.querySelector('#modal-update form');
+      switch (name) {
 
-    formUpdate.save().then(json => {
-      window.location.reload();
-    }).catch(err => { console.log(err) });
+        case 'date':
 
-    [...document.querySelectorAll('.btn-delete')].forEach(btnD => {
+          let date = moment(data[name]).format("YYYY-MM-DD");
+          if (input) { input.value = date; }
+          break;
 
-      btnD.addEventListener('click', e => {
-        let tr = btnD.closest('tr')
+        default:
+          if (input) { input.value = data[name]; }
+      }
 
-        let data = JSON.parse(tr.dataset.row);
+    }
+  });
 
-        if (`Confirma a exclusão do Menu "${data.title}" ?`) {
-          fetch(`/admin/menus/${data.id}`, {
-            method: 'DELETE'
-          }).then(response => response.json())
-            .then(json => { window.location.reload() })
-        }
-      });
-    });
-
-    [...document.querySelectorAll('.btn-update')].forEach(btn => {
-      btn.addEventListener('click', e => {
-        let tr = e.path.find(el => {
-          return (el.tagName.toUpperCase() === 'TR');
-        });
-
-        let data = JSON.parse(tr.dataset.row);
-        for (let name in data) {
-
-          switch (name) {
-            case 'photo':
-              formUpdate.querySelector('img').src = `/${data[name]}`
-              break;
-
-            default:
-              let input = formUpdate.querySelector(`[name=${name}]`);
-              if (input) { input.value = data[name]; }
-          }
-
-        };
-
-        $('#modal-update').modal('show');
-      });
-    });
 </script>

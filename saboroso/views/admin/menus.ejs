@@ -146,63 +146,32 @@
 
   <script src="/js/img_filereader.js"></script>
   <script src="/js/crud_data.js"></script>
+  <script src="/js/okosta_crud.js"></script>
 
   <script>
 
     new IMGFileReader("#modal-create [type=file]", "#modal-create img")
     new IMGFileReader("#modal-update [type=file]", "#modal-update img")
 
+    new OkostaCrud({
+      deleteMsg: 'Confirma a exclusão do Menu? "${data.title}" ?',
+      routerDelete: '/admin/menus/${data.id}',
+      onUpdateLoad: (form, name, data) =>{
 
-    let formCreate = document.querySelector('#modal-create form');
+        let input = form.querySelector(`[name=${name}]`);
 
-    formCreate.save().then(json=>{
-      window.location.reload();
-    }).catch(err=>{console.error(err)});
+        switch (name) {
 
-    let formUpdate = document.querySelector('#modal-update form');
+          case 'photo':
+            form.querySelector('img').src = `/${data[name]}`
+            break;
 
-    formUpdate.save().then(json => {
-        window.location.reload();
-      }).catch(err => { console.log(err) });
-
-    [...document.querySelectorAll('.btn-delete')].forEach(btnD =>{
-
-      btnD.addEventListener('click', e=>{
-        let tr = btnD.closest('tr')
-
-        let data = JSON.parse(tr.dataset.row);
-
-        if (`Confirma a exclusão do Menu "${data.title}" ?`) {
-          fetch(`/admin/menus/${data.id}`, {
-            method: 'DELETE'
-          }).then(response => response.json())
-            .then(json => { window.location.reload() })
+          default:
+            if (input) { input.value = data[name]; }
         }
-        });
-      });
 
-    [...document.querySelectorAll('.btn-update')].forEach(btn=>{
-      btn.addEventListener('click', e=>{
-        let tr = e.path.find(el =>{
-          return (el.tagName.toUpperCase() === 'TR');
-        });
-
-        let data = JSON.parse(tr.dataset.row);
-        for(let name in data){
-
-          switch(name){
-            case 'photo':
-               formUpdate.querySelector('img').src = `/${data[name]}`
-              break;
-
-            default:
-              let input = formUpdate.querySelector(`[name=${name}]`);
-              if(input){input.value = data[name]; }
-          }
-            
-        };
-
-        $('#modal-update').modal('show');
-      });
+      }
     });
+
+
   </script>

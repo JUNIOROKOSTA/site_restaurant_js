@@ -30,6 +30,21 @@ module.exports = {
             confirmed: alertSuccess, 
           })
     },
+
+    delete(id){
+        return new Promise((resolve, reject)=>{
+            conn.query(`
+                DELETE FROM tb_reservations WHERE id = ?
+            `,[id],(err, results)=>{
+                if(err){
+                    reject(err)
+                } else {
+                    resolve(results)
+                }
+            })
+        })
+    },
+
     save(fields){
         return new Promise((resolve, reject)=>{
             if(fields.date.indexOf('/') > -1){
@@ -42,13 +57,13 @@ module.exports = {
 
             if(parseInt(fields.id)> 0){
                 // if id > 0 ==> Update
-                query = `UPDATE INTO tb_reservations 
+                query = `UPDATE tb_reservations 
                 SET
-                    name = ?
-                    email = ?
-                    people = ?
-                    date = ?
-                    time = ? 
+                    name = ?,
+                    email = ?,
+                    people = ?,
+                    date = ?,
+                    time = ?
                 WHERE id = ? `;
 
                  params =  [fields.name, fields.email, 

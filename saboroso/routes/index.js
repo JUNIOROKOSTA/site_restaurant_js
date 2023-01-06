@@ -1,6 +1,7 @@
 const conn = require('./../inc/db');
 var express = require('express');
 var menus = require('./../inc/menus');
+var emails = require('./../inc/emails')
 var reservations = require('./../inc/reservations');
 var contacts = require('./../inc/contacts');
 var router = express.Router();
@@ -21,6 +22,18 @@ router.get('/', function(req, res, next) {
 
 router.get('/contacts',function(req, res, next){
   contacts.render(req, res)
+});
+
+router.post('/subscribe',function(req, res, next){
+  if(!req.fields.email){
+    res.send({
+      error: "Preencha o e-mail."
+    })
+  } else{
+    emails.save(req.fields, req.files).then(promise=>{
+        res.send(promise);
+    }).catch(err=>{res.send(err)})
+  }
 });
 
 router.post('/contacts',function(req, res, next){

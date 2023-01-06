@@ -21,6 +21,26 @@
 	<script src="js/moment.min.js"></script>
 	<script src="js/bootstrap-datetimepicker.min.js"></script>
 
+			<script src="/js/crud_data.js"></script>
+			
+			<!-- <script src="/js/okosta_crud.js"></script> -->
 
 	<!-- Main -->
 	<script src="js/main.js"></script>
+
+	<script>
+		let formSubscribe = document.querySelector("#form-subscribe");
+
+		if(formSubscribe){
+			formSubscribe.save({
+
+				success: () => {
+					alert("E-mail cadastrado com sucesso!")
+				},
+				failed:(err)=>{
+					alert(err);
+				}
+			})
+			
+		}
+	</script>

@@ -31,11 +31,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1.</td>
-                                    <td>contato@hcode.com.br</td>
+                                <% data.forEach(row => { %>
+
+                                <tr data-row="<%= JSON.stringify(row) %> ">
+                                    <td><%= row.id %> </td>
+                                    <td><%= row.email %></td>
                                     <td><button type="button" class="btn btn-xs btn-danger btn-delete"><i class="fa fa-trash"></i> Excluir</button></td>
                                 </tr>
+
+                                <% }) %>
+                                
                             </tbody>
                         </table>
                     </div>
@@ -49,3 +54,26 @@
 
         <!-- Main Footer -->
         <%- include("./inc_admin/footer.ejs") -%>
+
+        <script src="/js/crud_data.js"></script>
+        
+        <script src="/js/okosta_crud.js"></script>
+        
+        <script>
+
+            new OkostaCrud({
+                deleteMsg: 'Confirma a exclusão da E-mail?"${data.email}" ?',
+                routerDelete: '/admin/emails/${data.id}',
+                onUpdateLoad: (form, name, data) => {
+
+                    let input = form.querySelector(`[name=${name}]`);
+
+                    switch (name) {
+                        default:
+                            if (input) { input.value = data[name]; }
+                    }
+
+                }
+
+            });
+        </script>

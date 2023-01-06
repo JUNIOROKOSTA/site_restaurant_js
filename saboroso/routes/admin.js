@@ -3,6 +3,8 @@ var users = require('./../inc/users')
 var admin = require('./../inc/admin')
 var menus = require('./../inc/menus');
 var reservations = require('./../inc/reservations')
+var contacts = require('./../inc/contacts')
+var emails = require('./../inc/emails')
 const { promise } = require('../inc/db');
 var moment = require("moment");
 var router = express.Router();
@@ -44,14 +46,36 @@ router.get('/', function(req, res, next) {
 
 router.get('/contacts', function(req, res, next) {
 
-    res.render('admin/contacts',admin.getParams(req));
+    contacts.getContacts().then(data=>{
+        res.render('admin/contacts', admin.getParams(req, 
+            {
+                date: {},
+                data: data,
+            }));
+    })
 
 });;
 
+router.delete('/contacts/:id', function(req, res, next){
+    contacts.delete(req.params.id).then(promise=>{
+        res.send(promise)
+    }).catch(err=>{console.log(err)})
+});;
+
 router.get('/emails', function(req, res, next) {
+        emails.getEmails().then(data=>{
+        res.render('admin/emails', admin.getParams(req, 
+            {
+                date: {},
+                data: data,
+            }));
+    })
+});;
 
-    res.render('admin/emails', admin.getParams(req));
-
+router.delete('/emails/:id', function(req, res, next){
+    emails.delete(req.params.id).then(promise=>{
+        res.send(promise)
+    }).catch(err=>{console.log(err)})
 });;
 
 router.post('/login', function(req, res, next) {
@@ -127,8 +151,34 @@ router.delete('/reservations/:id', function(req, res, next){
 
 router.get('/users', function(req, res, next) {
 
-    res.render('admin/users', admin.getParams(req));
+    users.getUsers().then(data=>{
+        res.render('admin/users', admin.getParams(req, 
+            {
+                date: {},
+                data: data,
+            }));
+    })
 
+});;
+
+router.post('/users',function(req, res, next){
+    // res.send(req.files);
+    users.save(req.fields, req.files).then(promise=>{
+        res.send(promise);
+    }).catch(err=>{res.send(err)})
+});;
+
+router.post('/users/password-change',function(req, res, next){
+    // res.send(req.files);
+    users.passwordChange(req).then(promise=>{
+        res.send(promise);
+    }).catch(err=>{res.send({error: err})})
+});;
+
+router.delete('/users/:id', function(req, res, next){
+    users.delete(req.params.id).then(promise=>{
+        res.send(promise)
+    }).catch(err=>{console.log(err)})
 });;
 
 
