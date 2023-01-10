@@ -1,18 +1,44 @@
 var conn = require('./db');
+var moment = require('moment')
 const Pagination = require('./paginador');
 
 module.exports = {
+    
+     getReservations(req){
 
-     getReservations(page){
-        if(!page) page = 1;
+        return new Promise((resolve, reject)=>{
 
-        let pagina = new Pagination(
-            `
-            SELECT SQL_CALC_FOUND_ROWS * FROM tb_reservations ORDER BY name LIMIT ?, ?
-            `
-        );
+            let page = req.query.page;
+            let dtStart = req.query.start;
+            let dtEnd = req.query.end;
 
-        return pagina.getPage(page);
+            if(!page) page = 1;
+
+            let where = '';
+            let params= [];
+            if(dtStart && dtEnd){
+                where = 'WHERE date BETWEEN ? AND ?'
+                params.push(dtStart, dtEnd)
+            };
+
+            let pagina = new Pagination(
+                `
+                SELECT SQL_CALC_FOUND_ROWS * FROM tb_reservations 
+                ${where}
+                ORDER BY name LIMIT ?, ?
+                `,
+                params
+            );
+
+            pagina.getPage(page).then(data=>{
+                resolve({
+                    data,
+                    links: pagina.getNavigation(req.query)
+                })
+            }).catch(err=>{reject(err)})
+        
+        });
+        
 
         // return new Promise((resolve, reject)=>{
 
@@ -99,6 +125,53 @@ module.exports = {
                 resolve(result)
             }
         });
+        })
+    },
+
+        //   SELECT CONCAT(YEAR(date), '-', MONTH(date)) AS dates,
+        //     COUNT(*) AS total,
+        //     SUM(people) / COUNT(*)  AS avg_people
+        //     FROM tb_reservations
+        //     WHERE date BETWEEN ? AND ? 
+        //     GROUP BY YEAR(dates) DESC, MONTH(dates) DESC
+        //     ORDER BY YEAR(dates) DESC, MONTH(dates) DESC;
+
+    chart(req){
+        return new Promise((resolve, reject)=>{
+
+
+            conn.query(`
+                    SELECT
+                    YEAR(date) AS years,
+                    MONTH(date) AS months,
+                    COUNT(*) AS total,
+                    SUM(people) / COUNT(*) AS avg_people
+                    FROM saboroso.tb_reservations
+                    WHERE
+                    date BETWEEN ? AND ?
+                    GROUP BY 1, 2
+                    ORDER BY YEAR(date) ASC , MONTH(date) ASC;
+                    `, 
+            [req.query.start, req.query.end],
+            (err, results)=>{
+                if(err){
+                    reject(err)
+                } else{
+                    let months = [];
+                    let values = [];
+
+                    results.forEach(result=>{
+                        let date = `${result.years}-${result.months}`
+                        months.push(moment(date).format("MMM YYYY"));
+                        values.push(result.total)
+                    });
+
+                    resolve({
+                        months,
+                        values
+                    })
+                }
+            })
         })
     }
 }

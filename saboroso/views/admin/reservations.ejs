@@ -51,6 +51,15 @@
           </div>
           <!-- /.box-header -->
           <div class="box-body no-padding">
+
+            <div style="padding: 10px;">
+              
+              <canvas id="chart" style="height: 250px;">
+              
+              </canvas>
+              
+            </div>
+
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -87,11 +96,15 @@
           <!-- /.box-body -->
           <div class="box-footer clearfix">
             <ul class="pagination pagination-sm no-margin pull-right">
-              <li class="active"><a href="#">«</a></li>
-              <li><a href="#">1</a></li>
-              <li><a href="#">2</a></li>
-              <li><a href="#">3</a></li>
-              <li><a href="#">»</a></li>
+              <% links.forEach(link => { %>
+
+                <li <% if (link.active) { %>
+                class="active"
+                <% } %>><a href="<%= link.href %> "><%= link.text %> </a></li>
+               
+              <% }) %>
+              
+
             </ul>
           </div>
           <!-- /.box-footer -->
@@ -207,6 +220,10 @@
     <%- include("./inc_admin/footer.ejs") -%>
 
     <script src="/js/moment.min.js"></script>
+    
+    <!-- <script src="/admin/bower_components/chart.js/dist/Chart.min.js"></script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="/js/crud_data.js"></script>
 
@@ -234,5 +251,50 @@
 
     }
   });
+
+  let graphic = new Chart(document.querySelector("#chart").getContext("2d"), {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: '# Reservas',
+          backgroundColor:'#19c13e', 
+          borderColor: '#19c13e',
+          fill: true,
+          tension: 0.2,
+          data: [],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    })
+
+  fetch(`/admin/reservations/chart${window.location.search}`)
+  .then(response =>response.json())
+  .then(json=>{
+      graphic.data = {
+      labels: json.months,
+      datasets: [{
+        label: '# Reservas',
+        backgroundColor: '#19c13e',
+        borderColor: '#19c13e',
+        fill: true,
+        tension: 0.2,
+        data: json.values,
+        borderWidth: 1
+      }]
+    };
+
+    graphic.update();
+
+
+  });
+
 
 </script>

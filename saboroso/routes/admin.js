@@ -123,14 +123,36 @@ router.delete('/menus/:id', function(req, res, next){
 });;
 
 router.get('/reservations', function(req, res, next) {
+    let dtStart = (req.query.start) ? req.query.start : moment()
+    .subtract(10,"year").format("YYYY-MM-DD")
+    let dtEnd = (req.query.end) ? req.query.end : moment()
+    .format("YYYY-MM-DD")
 
-    reservations.getReservations().then(data=>{
+    reservations.getReservations(req).then(data=>{
         res.render('admin/reservations', admin.getParams(req, 
             {
-                date: {},
-                data: data,
-                moment
+                date: {
+                    start: dtStart,
+                    end: dtEnd
+                },
+                data: data.data,
+                moment,
+                links: data.links
             }));
+    })
+
+    
+
+});;
+
+router.get('/reservations/chart', function(req, res, next) {
+    req.query.start = (req.query.start) ? req.query.start : moment()
+    .subtract(1,"year").format("YYYY-MM-DD")
+    req.query.end = (req.query.end) ? req.query.end : moment()
+    .format("YYYY-MM-DD")
+
+    reservations.chart(req).then(data=>{
+        res.send(data)
     })
 
     
