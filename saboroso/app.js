@@ -6,19 +6,36 @@ const formidable = require('formidable');
 var logger = require('morgan');
 const session = require("express-session")
 let RedisStore = require("connect-redis")(session)
+const http = require('http');
+
 
 // Configuration REDIS.
 const { createClient } = require("redis")
 let redisClient = createClient({ legacyMode: true, })
 redisClient.connect().catch(console.error)
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var adminRouter = require('./routes/admin');
+
 
 var app = express();
 
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+io.on('connection', function(socket){
+    console.log('Novo usuário conectado!')
+
+});
+
+var indexRouter = require('./routes/index')(io);
+var usersRouter = require('./routes/users')(io);
+var adminRouter = require('./routes/admin')(io);
+
+
 app.use(function(req,res,next){
+
+    req.body = {};
+
     if(req.method === "POST"){
         var form = formidable({
         uploadDir: path.join(__dirname, "/public/images"),
@@ -87,4 +104,6 @@ app.use(function(err, req, res, next) {
     res.render('error');
 });
 
-module.exports = app;
+server.listen(3000, () => {
+  console.log('listening on *:3000');
+});

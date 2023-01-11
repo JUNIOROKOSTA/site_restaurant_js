@@ -173,5 +173,28 @@ module.exports = {
                 }
             })
         })
+    },
+
+    nrDB(){
+
+        return new Promise((resolve, reject)=>{
+
+
+            conn.query(`
+                    select 
+                    (select count(*) from tb_contacts) as nr_contacts,
+                    (select count(*) from tb_reservations) as nr_reservations,
+                    (select count(*) from tb_menus) as nr_menus,
+                    (select count(*) from tb_users) as nr_users;
+                    `, 
+                (err, results)=>{
+                    if(err){
+                        reject(err)
+                    } else{
+                        resolve(results[0])
+                    }
+            })
+        })
+
     }
 }

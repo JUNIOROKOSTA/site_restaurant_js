@@ -7,6 +7,11 @@ var contacts = require('./../inc/contacts');
 var router = express.Router();
 
 
+
+
+module.exports = function(io){
+
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
 
@@ -17,6 +22,7 @@ router.get('/', function(req, res, next) {
       isHome: true,
     })
   });
+  
 
 });
 
@@ -52,7 +58,7 @@ router.post('/contacts',function(req, res, next){
     }).catch(err=>{
       contacts.render(req, res, err.message);
     })
-
+    io.emit("dashboardUpdate");
   }
 });
 
@@ -78,6 +84,7 @@ router.get('/reservations',function(req, res, next){
 // {"name":"junior","email":"juniorkosta2013@gmail.com","people":"3","date":"29/12/2022","time":"11:35"}
 
 router.post('/reservations',function(req, res, next){
+  console.log("aki")
   if(!req.body.name){
     reservations.render(req, res, "Digite o Nome!");
   } else if(!req.body.email){
@@ -87,13 +94,13 @@ router.post('/reservations',function(req, res, next){
   } else if(!req.body.date){
     reservations.render(req, res, "Digite o Data que deseja reservar!");
   } else if(!req.body.time){
-    reservations.render(req, res, "Digite o Horario que deseja reservar!");
+    reservations.render(req, res, "Digite o Horário que deseja reservar!");
   } else{
+    io.emit("dashboardUpdate");
     reservations.save(req.body).then(results=>{
 
       req.body = {};
-
-      reservations.render(req, res, null, "Reserva relizada com sucesso!")
+      reservations.render(req, res, null, "Reserva realizada com sucesso!")
     }).catch(err=>{
       reservations.render(req, res, err.message)
     });
@@ -111,4 +118,5 @@ router.get('/services',function(req, res, next){
   })
 });
 
-module.exports = router;
+  return router
+};
